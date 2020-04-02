@@ -1,0 +1,22 @@
+skip_tags: true
+image: Visual Studio 2019
+
+install:
+  - cmd: choco install gitversion.portable --version 4.0.0 -y
+
+before_build:
+  - ps: gitversion /l console /output buildserver /updateAssemblyInfo
+
+build:
+  verbosity: detailed
+
+build_script:
+- cmd: dotnet restore ./appveyor-nuget-test.csproj --disable-parallel
+- cmd: dotnet build ./appveyor-nuget-test.csproj -c Release --disable-parallel
+- cmd: dotnet pack ./appveyor-nuget-test.csproj -p:PackageVersion=%GitVersion_NuGetVersionV2% -c Release --output %APPVEYOR_BUILD_FOLDER%/artifacts/
+
+artifacts:
+- path: artifacts/*
+
+nuget:
+  project_feed: true
